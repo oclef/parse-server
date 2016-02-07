@@ -25,7 +25,7 @@ We also have an [example project](https://github.com/ParsePlatform/parse-server-
 * fileKey - For migrated apps, this is necessary to provide access to files already hosted on Parse.
 * facebookAppIds - An array of valid Facebook application IDs.
 * serverURL - URL which will be used by Cloud Code functions to make requests against.
-
+*
 #### Client key options:
 
 The client keys used with Parse are no longer necessary with parse-server.  If you wish to still require them, perhaps to be able to refuse access to older clients, you can set the keys at intialization time.  Setting any of these keys will require all requests to provide one of the configured keys.
