@@ -10,7 +10,13 @@ var validPushTypes = ['ios', 'android'];
 
 function handlePushWithoutQueue(req) {
   // validateMasterKey(req);
+  if (PushAdapter.getAdapter() == null) {
+    throw new Parse.Error(Parse.Error.PUSH_MISCONFIGURED,
+                          'No pushAdapter set');
+  }
+  
   var where = getQueryCondition(req);
+  var payload = getPayload(req);
   validateDeviceType(where);
   // Replace the expiration_time with a valid Unix epoch milliseconds time
   req.body['expiration_time'] = getExpirationTime(req);
