@@ -10,11 +10,7 @@ var validPushTypes = ['ios', 'android'];
 
 function handlePushWithoutQueue(req) {
   // validateMasterKey(req);
-  if (PushAdapter.getAdapter() == null) {
-    throw new Parse.Error(Parse.Error.PUSH_MISCONFIGURED,
-                          'No pushAdapter set');
-  }
-  
+
   var where = getQueryCondition(req);
   var payload = getPayload(req);
   validateDeviceType(where);
@@ -25,7 +21,6 @@ function handlePushWithoutQueue(req) {
     response.results.map(function (data) {
       if (data.arn) {
         PushAdapter.getAdapter().publish(req.config, data.arn, payload)
-        console.log(data.arn)
       }
     });
   });
