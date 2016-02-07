@@ -3,18 +3,25 @@
 var Parse = require('parse/node').Parse,
     PromiseRouter = require('./PromiseRouter'),
     rest = require('./rest');
+    PushAdapter = require('./PushAdapter'),
+    AWS = require('aws-sdk');
 
 var validPushTypes = ['ios', 'android'];
 
 function handlePushWithoutQueue(req) {
-  validateMasterKey(req);
+  // validateMasterKey(req);
   var where = getQueryCondition(req);
   validateDeviceType(where);
   // Replace the expiration_time with a valid Unix epoch milliseconds time
   req.body['expiration_time'] = getExpirationTime(req);
   return rest.find(req.config, req.auth, '_Installation', where).then(function(response) {
-    throw new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE,
-                  'This path is not implemented yet.');
+    
+    response.results.map(function (data) {
+      if (data.arn) {
+        PushAdapter.getAdapter().publish(req.config, data.arn, payload)
+        console.log(data.arn)
+      }
+    });
   });
 }
 
@@ -99,6 +106,26 @@ function getQueryCondition(req) {
 }
 
 /**
+ * Get payload from the request body.
+ * @param {Object} request A request object
+ * @returns {Object} The data object of request body
+ */
+
+function getPayload(req) {
+  var body = req.body || {};
+  var hasData = typeof body.data !== 'undefined';
+
+  var data;
+  if (hasData) {
+    data = JSON.stringify(body.data);
+  } else {
+    throw new Parse.Error(Parse.Error.PUSH_MISCONFIGURED,
+                          'Payload required');
+  }
+  return data;
+}
+
+/**
  * Check whether the api call has master key or not.
  * @param {Object} request A request object
  */
@@ -121,4 +148,5 @@ if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
   module.exports.validateMasterKey = validateMasterKey;
   module.exports.getExpirationTime = getExpirationTime;
   module.exports.validateDeviceType = validateDeviceType;
+  module.exports.validateDeviceType = getPayload;
 }

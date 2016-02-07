@@ -7,6 +7,8 @@ var batch = require('./batch'),
     express = require('express'),
     FilesAdapter = require('./FilesAdapter'),
     S3Adapter = require('./S3Adapter'),
+    PushAdapter = require('./PushAdapter'),
+    SNSAdapter = require('./SNSAdapter'),
     middlewares = require('./middlewares'),
     multer = require('multer'),
     Parse = require('parse/node').Parse,
@@ -22,6 +24,7 @@ addParseCloud();
 //                    update, and delete
 // "filesAdapter": a class like GridStoreAdapter providing create, get,
 //                 and delete
+// "pushAdapter": a class like SNSAdapter providing publish
 // "databaseURI": a uri like mongodb://localhost:27017/dbname to tell us
 //          what database this Parse API connects to.
 // "cloud": relative location to cloud code to require, or a function
@@ -48,6 +51,9 @@ function ParseServer(args) {
   }
   if (args.filesAdapter) {
     FilesAdapter.setAdapter(args.filesAdapter);
+  }
+  if (args.pushAdapter) {
+    PushAdapter.setAdapter(args.pushAdapter);
   }
   if (args.databaseURI) {
     DatabaseAdapter.setAppDatabaseURI(args.appId, args.databaseURI);
