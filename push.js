@@ -18,11 +18,12 @@ function handlePushWithoutQueue(req) {
   req.body['expiration_time'] = getExpirationTime(req);
   return rest.find(req.config, req.auth, '_Installation', where).then(function(response) {
     
-    response.results.map(function (data) {
-      if (data.arn) {
-        PushAdapter.getAdapter().publish(req.config, data.arn, payload)
+    response.results.map(function (installation) {
+      if (installation) {
+        PushAdapter.getAdapter().publish(req.config, req.auth, installation, payload)
       }
     });
+    return {response: true}
   });
 }
 
@@ -118,7 +119,7 @@ function getPayload(req) {
 
   var data;
   if (hasData) {
-    data = JSON.stringify(body.data);
+    data = body.data;
   } else {
     throw new Parse.Error(Parse.Error.PUSH_MISCONFIGURED,
                           'Payload required');
