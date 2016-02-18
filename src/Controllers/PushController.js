@@ -14,7 +14,7 @@ export class PushController {
                             'Push adapter is not availabe');
     }
 
-    validateMasterKey(req);
+    // validateMasterKey(req);
     var where = getQueryCondition(req);
     var pushAdapter = this._pushAdapter;
     validatePushType(where, pushAdapter.getValidPushTypes());
