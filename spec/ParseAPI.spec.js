@@ -1,7 +1,7 @@
 // A bunch of different tests are in here - it isn't very thematic.
 // It would probably be better to refactor them into different files.
 
-var DatabaseAdapter = require('../DatabaseAdapter');
+var DatabaseAdapter = require('../src/DatabaseAdapter');
 var request = require('request');
 
 describe('miscellaneous', function() {
@@ -123,6 +123,22 @@ describe('miscellaneous', function() {
     }).then((results) => {
       expect(results.length).toEqual(1);
       done();
+    }, (error) => {
+      fail(error);
+      done();
+    });
+  });
+
+  it('query without limit get default 100 records', function(done) {
+    var objects = [];
+    for (var i = 0; i < 150; i++) {
+      objects.push(new TestObject({name: 'name' + i}));
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      return new Parse.Query(TestObject).find();
+    }).then((results) => {
+      expect(results.length).toEqual(100);
+    done();
     }, (error) => {
       fail(error);
       done();
@@ -568,6 +584,35 @@ describe('miscellaneous', function() {
       expect(e.code).toEqual(141);
       expect(e.message).toEqual('noway');
       delete Parse.Cloud.Functions['willFail'];
+      done();
+    });
+  });
+  
+  it('test cloud function query parameters', (done) => {
+    Parse.Cloud.define('echoParams', (req, res) => {
+      res.success(req.params);
+    });
+    var headers = {
+      'Content-Type': 'application/json',
+      'X-Parse-Application-Id': 'test',
+      'X-Parse-Javascript-Key': 'test'
+    };
+    request.post({
+      headers: headers,
+      url: 'http://localhost:8378/1/functions/echoParams', //?option=1&other=2
+      qs: {
+        option: 1,
+        other: 2
+      },
+      body: '{"foo":"bar", "other": 1}'
+    }, (error, response, body) => {
+      expect(error).toBe(null);
+      var res = JSON.parse(body).result;
+      expect(res.option).toEqual('1');
+      // Make sure query string params override body params
+      expect(res.other).toEqual('2');
+      expect(res.foo).toEqual("bar");
+      delete Parse.Cloud.Functions['echoParams'];
       done();
     });
   });
