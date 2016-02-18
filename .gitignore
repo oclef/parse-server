@@ -32,5 +32,3 @@ node_modules
 # WebStorm/IntelliJ
 .idea
 
-# Babel.js
-lib/
